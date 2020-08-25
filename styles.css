@@ -48,6 +48,10 @@ body {
     scale: 1.2;
 }
 
+.button.disabled{
+    background-color: white;
+}
+
 #divide{
     font-size: 20px;
 }

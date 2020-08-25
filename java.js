@@ -13,6 +13,10 @@ function multiply(a, b) {
 }
 
 function divide(a, b) {
+  if (b == 0) {
+    alert("You cannot divide by 0"); 
+    return 0;
+  }
   return a / b;
 }
 
@@ -21,21 +25,10 @@ function operate(myFunct, a, b) {
 }
 
 
-let totalValue = 0;
-let displayValue = 0;
-let funcPressed = "add";
+let totalValue = "";
+let displayValue = "";
+let funcPressed = "";
 let myDisplay = document.querySelector("#display p");
-
-// // highlight calculator buttons when pushed with keyboard
-// let regex = new RegExp(/\d|\.|\-|\+|x|\/|\=\*/);
-// let keys = document.addEventListener("keydown", (e) => {
-//   digit = e.key;
-//   if (!regex.test(digit)) return;
-//   e.preventDefault();
-//   flashButton(e.key);
-//   updateDisplay(e.key);
-// });
-
 
 const buttons = document.getElementById("buttons");
 buttons.addEventListener("click",function(clicked) {
@@ -50,15 +43,27 @@ buttons.addEventListener("click",function(clicked) {
         if(clicked.target.classList.contains("equals")) {
             displayValue = parseInt(myDisplay.textContent);
             myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
+            clearVariables();
             return;
-        }
-        if(clicked.target.classList.contains("func")){
+        } else if(clicked.target.classList.contains("func")){
+          if (totalValue == ""){
             funcPressed = clicked.target.id;
             totalValue = parseInt(myDisplay.textContent);
             clearDisplay();
             return;
+          }
+          displayValue = parseInt(myDisplay.textContent);
+          clearDisplay();
+          myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
+          totalValue = parseInt(myDisplay.textContent);
+          displayValue = "";
+          funcPressed = clicked.target.id;
+          return;
+        } else {
+          if (totalValue == myDisplay.textContent) clearDisplay();
+          updateDisplay(clicked.target.textContent);
+          if(clicked.target.textContent == ".") lockPeriod(clicked)
         }
-        updateDisplay(clicked.target.textContent);
     }
 })
 
@@ -66,8 +71,9 @@ function clearDisplay(){
     myDisplay.textContent = "0";
 }
 function clearVariables(){
-    totalValue = 0;
-    displayValue = 0;
+    totalValue = "";
+    displayValue = "";
+    funcPressed = "";
 }
 // remove the animation when it's finished
 const allKeys = document.querySelectorAll(".button");
@@ -88,3 +94,6 @@ function flashButton(buttonValue){
     pressedKey.classList.add("pressed");
 }
 
+function lockPeriod (key){
+  key.target.classList.add("disabled");
+}
