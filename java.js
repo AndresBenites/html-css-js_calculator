@@ -1,4 +1,8 @@
-console.log("test");
+let totalValue = "";
+let displayValue = "";
+let funcPressed = "";
+let myDisplay = document.querySelector("#display p");
+const buttons = document.getElementById("buttons");
 
 function add(a, b) {
   return a + b;
@@ -14,7 +18,7 @@ function multiply(a, b) {
 
 function divide(a, b) {
   if (b == 0) {
-    alert("You cannot divide by 0"); 
+    alert("You cannot divide by 0");
     return 0;
   }
   return a / b;
@@ -24,57 +28,102 @@ function operate(myFunct, a, b) {
   return window[myFunct](a, b);
 }
 
+function clearDisplay() {
+  myDisplay.textContent = "0";
+}
+function clearVariables() {
+  totalValue = "";
+  displayValue = "";
+  funcPressed = "";
+}
 
-let totalValue = "";
-let displayValue = "";
-let funcPressed = "";
-let myDisplay = document.querySelector("#display p");
+function updateDisplay(value) {
+  if (myDisplay.textContent == 0) myDisplay.textContent = "";
+  myDisplay.textContent += value;
+}
 
-const buttons = document.getElementById("buttons");
-buttons.addEventListener("click",function(clicked) {
-    if (clicked.target.classList.contains("button")){
-        clicked.preventDefault();
-        clicked.target.classList.add("pressed");
-        if(clicked.target.classList.contains("clear")) {
-            clearDisplay();
-            clearVariables();
-            return;
-        }
-        if(clicked.target.classList.contains("equals")) {
-            displayValue = parseInt(myDisplay.textContent);
-            myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
-            clearVariables();
-            return;
-        } else if(clicked.target.classList.contains("func")){
-          if (totalValue == ""){
-            funcPressed = clicked.target.id;
-            totalValue = parseInt(myDisplay.textContent);
-            clearDisplay();
-            return;
-          }
-          displayValue = parseInt(myDisplay.textContent);
-          clearDisplay();
-          myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
-          totalValue = parseInt(myDisplay.textContent);
-          displayValue = "";
-          funcPressed = clicked.target.id;
-          return;
-        } else {
-          if (totalValue == myDisplay.textContent) clearDisplay();
-          updateDisplay(clicked.target.textContent);
-          if(clicked.target.textContent == ".") lockPeriod(clicked)
-        }
+function flashButton(buttonValue) {
+  let pressedKey = document.getElementById(buttonValue);
+  pressedKey.classList.add("pressed");
+}
+
+function lockPeriod() {
+  period = document.getElementById(".");
+  period.classList.add("disabled");
+}
+
+function unlockPeriod() {
+  period = document.getElementById(".");
+  period.classList.remove("disabled");
+}
+
+function checkLockedPeriod() {
+  period = document.getElementById(".");
+  return period.classList.contains("disabled") ? true : false;
+}
+
+
+
+
+buttons.addEventListener("click", function (clicked) {
+  if (clicked.target.classList.contains("button")) {
+    clicked.preventDefault();
+    clicked.target.classList.add("pressed");
+
+    if (clicked.target.classList.contains("clear")) {
+      clearDisplay();
+      clearVariables();
+      unlockPeriod();
+      return;
     }
-})
+    // if = is pressed
+    if (clicked.target.classList.contains("equals")) {
+      if (funcPressed == "") return;
+      displayValue = parseFloat(myDisplay.textContent);
+      myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
+      clearVariables();
+      unlockPeriod();
+      return;
+      // if a function that isn't = is pressed
+    } else if (clicked.target.classList.contains("func")) {
+      // if this is the first time pressing a func key
+      if (totalValue == "") {
+        funcPressed = clicked.target.id;
+        totalValue = parseFloat(myDisplay.textContent);
+        clearDisplay();
+        unlockPeriod();
+        return;
+      }
+      // if this is not the first time pressing a func key
+      displayValue = parseFloat(myDisplay.textContent);
+      clearDisplay();
+      myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
+      totalValue = parseFloat(myDisplay.textContent);
+      displayValue = "";
+      funcPressed = clicked.target.id;
+      unlockPeriod();
+      return;
+      // if any othe key is clicked
+    } else {
+      // if the display is the totaled value from another calc
+      if (totalValue == myDisplay.textContent) clearDisplay();
 
-function clearDisplay(){
-    myDisplay.textContent = "0";
-}
-function clearVariables(){
-    totalValue = "";
-    displayValue = "";
-    funcPressed = "";
-}
+      // if the . is pressed and already locked, do nothing
+      if (clicked.target.id == "." && checkLockedPeriod()) {
+        return;
+      }
+      //if the . is pressed and not locked
+      if (clicked.target.id == "." && !checkLockedPeriod()) {
+        updateDisplay(clicked.target.textContent);
+        lockPeriod();
+        return;
+      }
+      // otherwise, just add the key to the display
+      updateDisplay(clicked.target.textContent);
+    }
+  }
+});
+
 // remove the animation when it's finished
 const allKeys = document.querySelectorAll(".button");
 allKeys.forEach((myButton) =>
@@ -82,18 +131,3 @@ allKeys.forEach((myButton) =>
     myButton.classList.remove("pressed");
   })
 );
-
-
-function updateDisplay(value){
-    if (myDisplay.textContent == 0) myDisplay.textContent = "";
-    myDisplay.textContent += value;
-}
-
-function flashButton(buttonValue){
-    let pressedKey = document.getElementById(buttonValue);
-    pressedKey.classList.add("pressed");
-}
-
-function lockPeriod (key){
-  key.target.classList.add("disabled");
-}
