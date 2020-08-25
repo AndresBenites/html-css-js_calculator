@@ -3,6 +3,7 @@ let displayValue = "";
 let funcPressed = "";
 let myDisplay = document.querySelector("#display p");
 const buttons = document.getElementById("buttons");
+const numbersReg = new RegExp(/\d/);
 
 function add(a, b) {
   return a + b;
@@ -62,8 +63,87 @@ function checkLockedPeriod() {
   return period.classList.contains("disabled") ? true : false;
 }
 
+function backspace(str) {
+  return str.slice(0, -1);
+}
 
+function clearAll() {
+  clearDisplay();
+  clearVariables();
+  unlockPeriod();
+}
 
+function equals() {
+  if (funcPressed == "") return;
+  displayValue = parseFloat(myDisplay.textContent);
+  myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
+  clearVariables();
+  unlockPeriod();
+}
+
+function funcKeyPressed(id) {
+  if (funcPressed == "") {
+    funcPressed = id;
+    totalValue = parseFloat(myDisplay.textContent);
+    clearDisplay();
+    unlockPeriod();
+    return;
+  } else {
+    displayValue = parseFloat(myDisplay.textContent);
+    clearDisplay();
+    myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
+    totalValue = parseFloat(myDisplay.textContent);
+    displayValue = "";
+    funcPressed = id;
+    unlockPeriod();
+  }
+}
+
+window.addEventListener("keydown", (key) => {
+  if (key.key == "Backspace") {
+    if (myDisplay.textContent == 0) return;
+    myDisplay.textContent = backspace(myDisplay.textContent);
+    if (myDisplay.textContent == "") myDisplay.textContent = 0;
+  }
+  if (key.key == "Escape") {
+    flashButton("clear");
+    clearAll();
+    unlockPeriod();
+  }
+  if (key.key == "Enter") {
+    flashButton("equals");
+    equals();
+  }
+  if (key.key == "/") {
+    key.preventDefault();
+    flashButton("divide");
+    funcKeyPressed("divide");
+  }
+  if (key.key == "*" || key.key == "x") {
+    flashButton("multiply");
+    funcKeyPressed("multiply");
+  }
+  if (key.key == "-") {
+    flashButton("subtract");
+    funcKeyPressed("subtract");
+  }
+  if (key.key == "+") {
+    flashButton("add");
+    funcKeyPressed("add");
+  }
+  if (key.key == "." && checkLockedPeriod()) {
+    return;
+  }
+  if (key.key == "." && !checkLockedPeriod()) {
+    flashButton(".");
+    updateDisplay(key.key);
+    lockPeriod();
+  }
+  if (!numbersReg.test(key.key)) return;
+  if (totalValue == myDisplay.textContent) clearDisplay();
+  flashButton(key.key);
+  updateDisplay(key.key);
+});
 
 buttons.addEventListener("click", function (clicked) {
   if (clicked.target.classList.contains("button")) {
@@ -71,37 +151,16 @@ buttons.addEventListener("click", function (clicked) {
     clicked.target.classList.add("pressed");
 
     if (clicked.target.classList.contains("clear")) {
-      clearDisplay();
-      clearVariables();
-      unlockPeriod();
+      clearAll();
       return;
     }
     // if = is pressed
     if (clicked.target.classList.contains("equals")) {
-      if (funcPressed == "") return;
-      displayValue = parseFloat(myDisplay.textContent);
-      myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
-      clearVariables();
-      unlockPeriod();
+      equals();
       return;
       // if a function that isn't = is pressed
     } else if (clicked.target.classList.contains("func")) {
-      // if this is the first time pressing a func key
-      if (totalValue == "") {
-        funcPressed = clicked.target.id;
-        totalValue = parseFloat(myDisplay.textContent);
-        clearDisplay();
-        unlockPeriod();
-        return;
-      }
-      // if this is not the first time pressing a func key
-      displayValue = parseFloat(myDisplay.textContent);
-      clearDisplay();
-      myDisplay.textContent = operate(funcPressed, totalValue, displayValue);
-      totalValue = parseFloat(myDisplay.textContent);
-      displayValue = "";
-      funcPressed = clicked.target.id;
-      unlockPeriod();
+      funcKeyPressed(clicked.target.id);
       return;
       // if any othe key is clicked
     } else {
@@ -114,7 +173,7 @@ buttons.addEventListener("click", function (clicked) {
       }
       //if the . is pressed and not locked
       if (clicked.target.id == "." && !checkLockedPeriod()) {
-        updateDisplay(clicked.target.textContent);
+        updateDisplay(clicked.target.id);
         lockPeriod();
         return;
       }
