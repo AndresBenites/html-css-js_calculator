@@ -1,7 +1,7 @@
 let totalValue = "";
 let displayValue = "";
 let funcPressed = "";
-let myDisplay = document.querySelector("#display p");
+const myDisplay = document.querySelector("#display p");
 const buttons = document.getElementById("buttons");
 const numbersReg = new RegExp(/\d/);
 const decimalReg = new RegExp(/\.0+/);
