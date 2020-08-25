@@ -4,6 +4,7 @@ let funcPressed = "";
 let myDisplay = document.querySelector("#display p");
 const buttons = document.getElementById("buttons");
 const numbersReg = new RegExp(/\d/);
+const decimalReg = new RegExp(/\.0+/);
 
 function add(a, b) {
   return a + b;
@@ -39,7 +40,13 @@ function clearVariables() {
 }
 
 function updateDisplay(value) {
-  if (myDisplay.textContent == 0) myDisplay.textContent = "";
+  if (decimalReg.test(myDisplay.textContent)){
+    console.log("decimalReg true");
+    myDisplay.textContent += value;
+    return;
+  } else if (myDisplay.textContent == 0){
+    myDisplay.textContent = "";
+  }
   myDisplay.textContent += value;
 }
 
